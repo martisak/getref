@@ -7,7 +7,7 @@ Command line interface to [dblp](dblp.org).
 ## Installation
 
 ```
-pip install git+https://github.com/martisak/getref.git
+pip install getref
 ```
 
 ## Usage
