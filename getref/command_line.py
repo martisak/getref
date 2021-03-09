@@ -27,7 +27,12 @@ def query(query):
     for n, hit  in enumerate(results):
         if hit is None: continue
         authors = hit["info"].pop("authors")
-        hit["info"]["authors"] = [a["text"] for a in authors["author"]]
+
+        if isinstance(authors["author"], dict):
+            hit["info"]["authors"] = authors["author"]["text"]
+        else:
+            hit["info"]["authors"] = [a["text"] for a in authors["author"]]
+
         hit["info"]["bibtex"] = get_bib(hit["info"]["key"])
         hits.update({n: hit["info"]})
 
