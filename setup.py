@@ -24,10 +24,9 @@ setup(
     install_requires=[
           'simple-term-menu==0.10.5',
           'Pygments==2.8.1',
-          'requests==2.25.1'
+          'requests==2.25.1',
+          'multiprocess==0.70.11.1'
     ],
-    entry_points={
-        'console_scripts': ['getref=getref.command_line:main'],
-    },
+    scripts=['bin/getref'],
     zip_safe=False
 )
