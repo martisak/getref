@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='getref',
-    version='0.32',
+    version='0.35',
     description='Command line interface to dblp',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',

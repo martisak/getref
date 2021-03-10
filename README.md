@@ -2,7 +2,7 @@
 
 # getref
 
-Command line interface to [dblp](dblp.org).
+Text-menu and command line interface to [dblp](dblp.org).
 
 ![Screenshot](screenshot.png)
 
@@ -22,6 +22,7 @@ Or pipe into file
 
 ```
 getref QUERY >> references.bib
+getref QUERY1 QUERY2 --all >> references.bib
 ```
 
 
