@@ -5,6 +5,7 @@ from simple_term_menu import TerminalMenu
 from pygments import highlight
 from pygments.lexers.bibtex import BibTeXLexer
 from pygments.formatters import TerminalFormatter
+from multiprocess import Process, Manager
 
 def args_parser():
     parser = argparse.ArgumentParser()
@@ -18,25 +19,33 @@ def query(query):
     r = requests.get('http://dblp.uni-trier.de/search/publ/api', params={'q': query, 'h':100, 'format': 'json'})
     json_answer = r.json()
 
-    hits = {}
+    manager = Manager()
+    hits = manager.dict()
 
     results = json_answer["result"]["hits"].get("hit", None)
     if results is None:
         return None
 
-    for n, hit  in enumerate(results):
-        if hit is None: continue
-        authors = hit["info"].pop("authors")
+    def f(d, hit, n):
 
+        if hit is None:
+            return
+
+        authors = hit["info"].pop("authors")
         if isinstance(authors["author"], dict):
             hit["info"]["authors"] = authors["author"]["text"]
         else:
             hit["info"]["authors"] = [a["text"] for a in authors["author"]]
 
         hit["info"]["bibtex"] = get_bib(hit["info"]["key"])
-        hits.update({n: hit["info"]})
+        d[n] = hit["info"]
 
-    return hits
+    job = [Process(target=f, args=(hits, hit, n)) for n, hit in enumerate(results)]
+    _ = [p.start() for p in job]
+    _ = [p.join() for p in job]
+
+    return dict(hits)
+
 
 def menu(hits):
 
@@ -73,7 +82,7 @@ def main():
         quit()
 
     item = menu(hits)
-    print(get_bib(hits[item]["key"]))
+    print(hits[item]["bibtex"])
 
 if __name__ == "__main__":
     main()
