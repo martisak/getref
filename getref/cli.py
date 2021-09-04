@@ -1,13 +1,13 @@
 import argparse
-import requests
-import json
+import shutil
 import sys
-from simple_term_menu import TerminalMenu
+
+from multiprocess import Process, Manager
 from pygments import highlight
 from pygments.lexers.bibtex import BibTeXLexer
 from pygments.formatters import TerminalFormatter
-from multiprocess import Process, Manager
-import shutil
+import requests
+from simple_term_menu import TerminalMenu
 
 
 def fullname(str1):
@@ -32,8 +32,18 @@ def args_parser():
     return parser.parse_args()
 
 
-def query(query_lst):
+class ConnectionError(Exception):
+    def __init__(self, code, description=None):
+        super().__init__()
+        self.code = code
+        self.description = ("" if not description else description)
 
+    def __str__(self):
+        desc = (f": {self.description}" if self.description else "")
+        return f"HTTP error {self.code}{desc}"
+
+def query(query_lst):
+    """Query DBLP over HTTP."""
     manager = Manager()
     hits = manager.dict()
 
@@ -44,7 +54,7 @@ def query(query_lst):
                          params={'q': q, 'h': 100, 'format': 'json'})
 
         if r.status_code == 429:
-            raise Error
+            raise ConnectionError(r.status_code, "too many requests")
 
         json_answer = r.json()
 
@@ -134,7 +144,7 @@ def main():
         sys.exit()
 
     if args.all:
-        for k,v in hits.items():
+        for v in hits.values():
             print(v["bibtex"])
 
     else:
